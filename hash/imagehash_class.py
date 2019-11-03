@@ -4,7 +4,7 @@ import numpy
 
 def _binary_array_to_hex(arr):
     """
-    bool type array -> binary string -> hex string으로 변환 ex) [True False True True] -> 1011 ->
+    bool type array -> binary string -> hex string으로 변환 ex) [True False True True] -> 1011 -> e
     """
     bit_string = ''.join(str(b) for b in 1 * arr.flatten())
     width = int(numpy.ceil(len(bit_string) / 4))  # 16진수로 바꿀때 길이지정
