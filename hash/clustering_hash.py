@@ -24,7 +24,7 @@ def make_imghash(userpath, hashfunc=imagehash.average_hash):
     filename_hash = {}
     image_filenames = []
     for img in temp_image_filenames:
-        newName = os.path.dirname(img) + '\\' + str(gloCount) + '_test2.jpg'
+        newName = os.path.dirname(img) + '\\' + str(gloCount) + '_test.jpg'
 
         os.rename(img, newName)
         img = newName
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     elif hashmethod == 'whash-db4':
         hashfunc = lambda img: imagehash.whash(img, mode='db4')
 
-    userpath = os.getcwd() + '\img3'
+    userpath = os.getcwd() + '\images'
 
     filename_hash, image_filenames = make_imghash(userpath=userpath, hashfunc=hashfunc)
     cal_sim(filename_hash, image_filenames)
