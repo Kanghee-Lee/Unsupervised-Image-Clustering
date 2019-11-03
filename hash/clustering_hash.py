@@ -1,5 +1,5 @@
 from PIL import Image
-import imagehash_class as imagehash
+import hash.imagehash_class as imagehash
 
 isFirst = True
 
