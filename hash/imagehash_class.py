@@ -30,7 +30,46 @@ class ImageHash(object):
             raise TypeError('Other hash must not be None.')
         if self.hash.size != other.hash.size:
             raise TypeError('ImageHashes must be same shape.', self.hash.shape, other.hash.shape)
-        return numpy.count_nonzero(self.hash.flatten() != other.hash.flatten())
+        #return numpy.count_nonzero(self.hash.flatten() != other.hash.flatten())
+        '''   
+            #######images3_2와for4;for4
+        l = []
+        h1 = self.hash.flatten()
+        c1=h1
+        r1=self.hash
+        h2 = other.hash.flatten()
+        for _ in range(4):
+            c1 = numpy.concatenate([[c1[-1]], c1[:-1]])
+            l.append(numpy.count_nonzero(c1 != h2))
+        for _ in range(4):
+            r1 = numpy.concatenate([[r1[-1]], r1[:-1]])
+            l.append(numpy.count_nonzero(r1.flatten() != h2))
+        #########
+        return min(l)
+        '''
+
+        l=[]
+        h1=self.hash.flatten()
+        #c1=h1
+        c1=self.hash
+        #r1=self.hash
+        h2=other.hash.flatten()
+        for _ in range(2):
+            l.append(numpy.count_nonzero(c1.flatten() != h2))
+            r1 = c1
+            for _ in range(2):
+                r1 = numpy.concatenate([[r1[-1]], r1[:-1]])
+                l.append(numpy.count_nonzero(r1.flatten()!=h2))
+
+            # c1 = numpy.concatenate([[c1[-1]], c1[:-1]])
+            c1 = numpy.concatenate([c1[:, -1][:, numpy.newaxis], c1[:, 0:-1]], axis=1)
+        #print('*'*50)
+        #print(l)
+        #print('*' * 50)
+        return min(l)
+        
+
+
 
     def __eq__(self, other):
         if other is None:
@@ -45,7 +84,6 @@ class ImageHash(object):
     def __hash__(self):
         # 딕셔너리에서 빠른 키 비교를 위해 8bit 정수 return
         return sum([2 ** (i % 8) for i, v in enumerate(self.hash.flatten()) if v])
-
 
 '''
 일단은 필요 없어보임
@@ -64,7 +102,7 @@ def average_hash(image, hash_size=8):
         raise ValueError("Hash size must be greater than or equal to 2")
 
     # ANTIALIAS를 이용한 보간법으로 크기 줄임 & grayscale
-    image = image.convert("L").resize((hash_size, hash_size), Image.ANTIALIAS)
+    image = image.convert("RGB").resize((hash_size, hash_size), Image.ANTIALIAS)
     # numpy.asarray로 image의 참조형태 배열 생성 -> image변경되면 배열도 같이 바껴야하니까
     pixels = numpy.asarray(image)
     avg = pixels.mean()
@@ -74,16 +112,16 @@ def average_hash(image, hash_size=8):
     return ImageHash(diff)
 
 
-'''
-지금으로썬 ahash로 쭉 갈 가능성 높음
-def phash(image, hash_size=8, highfreq_factor=4):
+
+#지금으로썬 ahash로 쭉 갈 가능성 높음
+def phash(image, hash_size=16, highfreq_factor=4):
 
     if hash_size < 2:
         raise ValueError("Hash size must be greater than or equal to 2")
 
     import scipy.fftpack
     img_size = hash_size * highfreq_factor
-    image = image.convert("L").resize((img_size, img_size), Image.ANTIALIAS)
+    image = image.convert("RGB").resize((img_size, img_size), Image.ANTIALIAS)
     pixels = numpy.asarray(image)
     dct = scipy.fftpack.dct(scipy.fftpack.dct(pixels, axis=0), axis=1)
     dctlowfreq = dct[:hash_size, :hash_size]
@@ -104,7 +142,7 @@ def phash_simple(image, hash_size=8, highfreq_factor=4):
     return ImageHash(diff)
 
 
-def dhash(image, hash_size=8):
+def dhash(image, hash_size=16):
     if hash_size < 2:
         raise ValueError("Hash size must be greater than or equal to 2")
 
@@ -114,7 +152,7 @@ def dhash(image, hash_size=8):
     diff = pixels[:, 1:] > pixels[:, :-1]
     return ImageHash(diff)
 
-
+'''
 def dhash_vertical(image, hash_size=8):
     image = image.convert("L").resize((hash_size, hash_size + 1), Image.ANTIALIAS)
     pixels = numpy.asarray(image)

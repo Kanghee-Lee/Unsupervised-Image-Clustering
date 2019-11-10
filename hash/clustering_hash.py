@@ -24,7 +24,7 @@ def make_imghash(userpath, hashfunc=imagehash.average_hash):
     filename_hash = {}
     image_filenames = []
     for img in temp_image_filenames:
-        newName = os.path.dirname(img) + '\\' + str(gloCount) + '_test.jpg'
+        newName = os.path.dirname(img) + '\\' + str(gloCount) + '_test2.jpg'
 
         os.rename(img, newName)
         img = newName
@@ -40,14 +40,53 @@ def make_imghash(userpath, hashfunc=imagehash.average_hash):
         filename_hash[img] = hash
     return filename_hash, image_filenames
 
-
+'''
 def cal_sim(filename_hash, image_filenames):
 
     for idx1 in range(len(image_filenames)):
         for idx2 in range(idx1 + 1, len(image_filenames)):
             print(image_filenames[idx1][-12:-10], image_filenames[idx2][-12:-10])
             print(filename_hash[image_filenames[idx1]] - filename_hash[image_filenames[idx2]])
+'''
+#grouping
+global_count=1
+def cal_sim(hash1, hash2):
+    return hash1-hash2
 
+same_group=[]
+def grouping(filename_hash, image_filenames):
+    global global_count
+    for idx1 in range(len(image_filenames)):
+        for idx2 in range(idx1 + 1, len(image_filenames)):
+            hash1, hash2=filename_hash[image_filenames[idx1]], filename_hash[image_filenames[idx2]]
+            sim=cal_sim(hash1, hash2)
+            sim2=cal_sim(hash2, hash1)
+            sim=min(sim, sim2)
+            if sim <=55 :
+                if hash1.group_number==-1 and hash2.group_number==-1 :
+                    hash1.group_number, hash2.group_number=global_count, global_count
+                    global_count+=1
+                elif hash1.group_number==-1 :
+                    hash1.group_number = hash2.group_number
+                elif hash2.group_number==-1 :
+                    hash2.group_number = hash1.group_number
+                elif hash1.group_number!=hash2.group_number:
+                    same_group.append([hash1.group_number, hash2.group_number])
+            print(image_filenames[idx1][-12:-9], image_filenames[idx2][-12:-9])
+            print(sim)
+
+group_dict={}
+def print_group(filename_hash, image_filenames) :
+    global same_group
+    for idx1 in range(len(image_filenames)):
+        if filename_hash[image_filenames[idx1]].group_number in group_dict.keys():
+            group_dict[filename_hash[image_filenames[idx1]].group_number].append(image_filenames[idx1][-12:-9])
+        else :
+            group_dict[filename_hash[image_filenames[idx1]].group_number] =[image_filenames[idx1][-12:-9]]
+    print(same_group)
+    print(group_dict)
+
+#grouping
 
 if __name__ == '__main__':
     import sys, os
@@ -67,7 +106,8 @@ if __name__ == '__main__':
     elif hashmethod == 'whash-db4':
         hashfunc = lambda img: imagehash.whash(img, mode='db4')
 
-    userpath = os.getcwd() + '\images'
-
+    userpath = os.getcwd() + r'\realtest'
+#images3_3 -> 4x4 for문으로 16개씩 hash코드 생성해보자
     filename_hash, image_filenames = make_imghash(userpath=userpath, hashfunc=hashfunc)
-    cal_sim(filename_hash, image_filenames)
+    grouping(filename_hash, image_filenames)
+    print_group(filename_hash, image_filenames)
